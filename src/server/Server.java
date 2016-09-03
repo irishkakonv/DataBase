@@ -128,8 +128,24 @@ public class Server {
         request = req;
     }
 
-    private void handleRequest() {
-        switch (request.getType()) {}
+    private void handleRequest() throws IOException{
+        /** handle request and fill the answer*/
+        Answer ans = new Answer(request.getType(), AnswerType.NON, "");
+        /** Fill the data*/
+        readFile();
+        switch (request.getType()) {
+            case ADD:
+                break;
+            case FIND:
+                break;
+            case DELETE:
+                break;
+            default:
+                System.out.println("Error: unknown error");
+                throw new IOException();
+        }
+        data.clear();
+        answer = ans;
     }
 
 
