@@ -1,8 +1,5 @@
 package server;
 
-import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
-import jdk.jfr.internal.BufferWriter;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
