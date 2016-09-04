@@ -1,7 +1,8 @@
 package client;
 
 /**
- * Created by Irina Konyashkina onn 03.09.2016.
+ * Create the client and send the command
  */
 public class Client {
+    
 }
