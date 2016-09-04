@@ -19,16 +19,16 @@ public class Client {
     private BufferedReader br;
     private BufferedWriter bw;
 
-
+    /** Create socket and connect server */
     public Client (String addr, int port) {
         try {
-            /** connect to server */
+            /** Connect to server */
             this.addr = InetAddress.getByName(addr);
             this.port = port;
             socket = new Socket(addr, port);
-            /** input */
+            /** Input socket */
             br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            /** output */
+            /** Output socket */
             bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         } catch (UnknownHostException ex) {
             System.err.println("illegal" + addr);
@@ -36,19 +36,34 @@ public class Client {
             System.err.println();
         }
 
-        getStr();
+        getCommandFromConsole();
+        getAnswer();
     }
 
-    private void getStr() {
+    /** Get the command from the console and input the server buffer */
+    private void getCommandFromConsole() {
         try {
-            bw.write(String.valueOf(System.in));
+            System.out.println("Enter the command(ADD/FIND/DELETE:key=value)...");
+            /** Input the command from the console */
+            BufferedReader bufCommandFromConsole = new BufferedReader(new InputStreamReader(System.in));
+            String line = bufCommandFromConsole.readLine();
+            /** Write the command to server buffer */
+            bw.write(line);
             bw.flush();
-
-            String svrAnsw = br.readLine();
-            System.out.println("Answer: " + svrAnsw);
-
         } catch (IOException ex) {
             System.err.println("Can't handle client request");
+            ex.printStackTrace();
+        }
+    }
+
+    private void getAnswer() {
+        try {
+            /** Read answer from socket buffer */
+            String serverAnsw = br.readLine();
+            System.out.println("Answer: " + serverAnsw);
+
+        } catch (IOException ex) {
+            System.err.println("Can't handle server answer");
             ex.printStackTrace();
         }
     }
