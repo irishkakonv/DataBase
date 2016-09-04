@@ -26,15 +26,27 @@ public class Request {
         + ", key = " + this.key + " and value = " + this.value);
     }
 
-    public RequestType getType() {
+    void setType(RequestType t){
+        type = t;
+    }
+
+    void setKey(String k){
+        key = k;
+    }
+
+    void setValue(String v){
+        value = v;
+    }
+
+    RequestType getType() {
         return type;
     }
 
-    public String getKey() {
+    String getKey() {
         return key;
     }
 
-    public String getValue() {
+    String getValue() {
         return value;
     }
 }

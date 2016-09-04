@@ -41,9 +41,18 @@ public class Server {
     Request request;
     Answer answer;
 
-    /** The constructor*/
+    /** The constructor with port*/
     public Server(int port){
         this.port = port;
+        this.dbFilePath = "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/db.txt";
+        data = new LinkedList<Box>();
+    }
+
+    /** The constructor with port and dbPath */
+    public Server(int port, String filePath){
+        this.port = port;
+        this.dbFilePath = filePath;
+        data = new LinkedList<Box>();
     }
 
     /** Creating the server socket, waiting for the connection*/
@@ -88,7 +97,7 @@ public class Server {
         RequestType type = RequestType.UNKNOUWN;    // default value
         String key = "<key>";                       // default value
         String value = "[value]";                   // default value
-        String command = "ADD:<key>=[value]";       // for test
+        String command = "FIND:mama=s";       // for test
 //        String command;
 //        try {
 //            command = bufferedReader.readLine();
@@ -128,24 +137,163 @@ public class Server {
         request = req;
     }
 
+    /** handle request and fill the instance of the answer*/
     private void handleRequest() throws IOException{
-        /** handle request and fill the answer*/
-        Answer ans = new Answer(request.getType(), AnswerType.NON, "");
+        Answer ans = new Answer(request.getType(), AnswerType.NON, "", "");     // the default answer
         /** Fill the data*/
         readFile();
         switch (request.getType()) {
             case ADD:
+                System.out.println("Handle ADD...");
+                if (keyExists(request.getKey())) {
+                    ans.setAnswer(AnswerType.FAIL);
+                    ans.setMessage("The key " + request.getKey() + " already exists");
+                } else {
+                    System.out.println("Adding key-value");
+                    data.add(new Box(request.getKey(), request.getValue()));
+                    writeFile();
+                    ans.setAnswer(AnswerType.OK);
+                    ans.setMessage("The key " + request.getKey()
+                            + " and the value " + request.getValue() + " were added successfully");
+                }
                 break;
+
             case FIND:
+                System.out.println("Handle FIND...");
+                try {
+                    ans.setValue(findBox(request.getKey()));
+                    ans.setAnswer(AnswerType.OK);
+                    ans.setMessage("The value was found");
+                } catch (Exception ex) {
+                    ans.setAnswer(AnswerType.FAIL);
+                    ans.setMessage("The key " + request.getKey() +" was not found");
+                }
                 break;
+
             case DELETE:
+                System.out.println("Handle DELETE...");
+                if (keyExists(request.getKey())) {
+                    removeBox(request.getKey());
+                    writeFile();
+
+                    ans.setAnswer(AnswerType.OK);
+                    ans.setMessage("The key " + request.getKey() + "was deleted");
+                } else {
+                    ans.setAnswer(AnswerType.FAIL);
+                    ans.setMessage("The key " + request.getKey() + " was not found");
+                }
                 break;
+
             default:
                 System.out.println("Error: unknown error");
                 throw new IOException();
         }
-        data.clear();
+        data.clear();   // clean the data
         answer = ans;
+    }
+
+    /** Open file and fill the data */
+    private void readFile() throws FileNotFoundException{
+        /** The special object for building strings */
+        File file = new File(dbFilePath);
+        try {
+            exists(file);     // check the file path
+        } catch (FileNotFoundException ex) {
+            System.out.println("The file doesn't exist!");
+            throw new RuntimeException(ex);
+        }
+
+        try {
+            /** The object for reading in buffer*/
+            BufferedReader in = new BufferedReader(new FileReader( file.getAbsoluteFile()));
+            try {
+                /** Read the file by a string */
+                String str;
+                while((str = in.readLine()) != null) {
+                    if (str.contains(" ")) {
+                        String[] keyAndValue = str.split(" ");
+                        try {
+                            Box box = new Box(keyAndValue[0], keyAndValue[1]);
+                            data.add(box);
+                        } catch (IndexOutOfBoundsException ex) {
+                            System.out.println("ERROR: incorrect data in the file");
+                            throw new IOException(ex);
+                        }
+                    } else {
+                        System.out.println("ERROR: incorrect data in the file");
+                        throw new IOException();
+                    }
+                }
+            } finally {
+                /** Close the file */
+                in.close();
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /** Writing to the file from the data */
+    private void writeFile() throws IOException {
+        File file = new File(dbFilePath);
+
+        try {
+            /** If file doesn't exist, create the file */
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            PrintWriter out = new PrintWriter(file.getAbsoluteFile());
+            try {
+                for (Box box: data) {
+                    out.print(box.getKey() + " " + box.getValue() + '\n');
+                }
+            } finally {
+                out.close();
+            }
+
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        System.out.println("The file was written successfully");
+    }
+
+    private String findBox(String key) throws Exception {
+        for (Box box: data) {
+            if (box.getKey().equals(key)) {
+                System.out.println("The value was found");
+                return box.getValue();
+            }
+        }
+        System.out.println("The value wasn't found");
+        throw new Exception();
+    }
+
+    private void removeBox(String key) {
+        for (Box box: data) {
+            if (box.getKey().equals(key)) {
+                data.remove(box);
+                break;
+            }
+        }
+    }
+
+    /** Check the key */
+    private boolean keyExists(String key) {
+        for (Box box: data) {
+            if (box.getKey().equals(key)) {
+                System.out.println("The key exists");
+                return true;
+            }
+        }
+        System.out.println("The key doesn't exist");
+        return false;
+    }
+
+    /** Check the file */
+    private static void exists(File file) throws FileNotFoundException {
+        if (!file.exists()) {
+            throw new FileNotFoundException(file.getName());
+        }
     }
 
 
