@@ -1,12 +1,6 @@
 package server;
 
-/** Enum with with different request type */
-enum RequestType {
-    ADD,
-    FIND,
-    DELETE,
-    UNKNOUWN
-}
+
 
 /**
  * This class create the request with the request type,
@@ -26,19 +20,19 @@ public class Request {
         + ", key = " + this.key + " and value = " + this.value);
     }
 
-    void setType(RequestType t){
+    void setType(RequestType t) {
         type = t;
     }
 
-    void setKey(String k){
+    void setKey(String k) {
         key = k;
     }
 
-    void setValue(String v){
+    void setValue(String v) {
         value = v;
     }
 
-    RequestType getType() {
+    RequestType getType()  {
         return type;
     }
 

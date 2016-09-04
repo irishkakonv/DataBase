@@ -6,26 +6,6 @@ import java.net.Socket;
 import java.util.LinkedList;
 
 
-/** The instance of this class contains key and value */
-class Box {
-    private String key;
-    private String value;
-
-    public Box(String k, String v){
-        this.key = k;
-        this.value = v;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public String getValue() {
-        return value;
-    }
-}
-
-
 /**
  * This class create the instance of server and run client's command.
  */
@@ -33,8 +13,8 @@ public class Server {
     private int port;
     private ServerSocket ss;
     private Socket socket;
-    private BufferedReader bufferedReader;
-    private BufferedWriter bufferedWriter;
+    private BufferedReader in;
+    private PrintWriter out;
 
     String dbFilePath;
     LinkedList<Box> data;
@@ -57,51 +37,60 @@ public class Server {
 
     /** Creating the server socket, waiting for the connection*/
     public void start(){
-//        try{
-//            ss = new ServerSocket(this.port);
-//            while(true){
-//                System.out.println("Waiting for a client...");
-//                /** accept connection */
-//                socket = ss.accept();
-//                System.out.println("The client ip is " + socket.getInetAddress());
-//                /** input */
-//                bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//                /** output */
-//                bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        try{
+            ss = new ServerSocket(this.port);
+            while(true) {
+                System.out.println("Waiting for a client...");
+                /** accept connection */
+                socket = ss.accept();
+                System.out.println("The client ip is " + socket.getInetAddress());
+                /** input */
+                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                /** output */
+                out = new PrintWriter(socket.getOutputStream(), true);
 
-                exec();
+                String input;
+                while ((input = in.readLine()) != null) {
+                    if (input.equalsIgnoreCase("exit")) break;
+                    /** The common function */
+                    exec(input);
 
-//                try {
-//                    bufferedWriter.write();
-//                }
+                    if (answer == null) {
+                        answer.setRequest(RequestType.ADD);
+                        answer.setAnswer(AnswerType.NON);
+                        answer.setValue("");
+                        answer.setMessage("The value is required for this command!");
+                    }
+                    /** Send the answer to a client */
+                    out.write("The answer: The command " + answer.getRequest() + " with status "
+                            + answer.getAnswer() + ". The value is " + answer.getValue()
+                            + " and the message: " + answer.getMessage() + '\n');
+                    out.flush();
+                }
             }
-//        } catch (IOException ex){
-//            System.err.println("Can't start the server!");
-//            ex.printStackTrace();
-//        }
-//    }
+        } catch (IOException ex){
+            System.err.println("Can't start the server!");
+            ex.printStackTrace();
+        }
+    }
 
     /** This method control the sequence of the execution command */
-    public void exec() {
+    public void exec(String command) {
         try {
-            parseClientCommand();
+            parseClientCommand(command);
             handleRequest();
         } catch (IOException ex) {
             System.err.println("Can't parse the command from user");
             ex.printStackTrace();
+            return;
         }
 
     }
 
-    private void parseClientCommand() throws IOException {
+    private void parseClientCommand(String command) throws IOException {
         RequestType type = RequestType.UNKNOUWN;    // default value
-        String key = "<key>";                       // default value
-        String value = "[value]";                   // default value
-        String command = "FIND:mama=s";       // for test
-//        String command;
-//        try {
-//            command = bufferedReader.readLine();
-//        } catch (IOException ex) {} // ?????????????????
+        String key = "<key>";                       // default required value
+        String value = null;                          // default value
 
         if (!command.contains(":")) {
             throw new IOException();
@@ -132,6 +121,11 @@ public class Server {
             value = keyAndValue[1];
         } else {
             key = temp[1];
+        }
+
+        if (type == RequestType.ADD && value == null) {
+            System.out.println("The value is required for this command!");
+            throw new IOException();
         }
         Request req = new Request(type, key, value);
         request = req;
@@ -177,7 +171,7 @@ public class Server {
                     writeFile();
 
                     ans.setAnswer(AnswerType.OK);
-                    ans.setMessage("The key " + request.getKey() + "was deleted");
+                    ans.setMessage("The key " + request.getKey() + " was deleted");
                 } else {
                     ans.setAnswer(AnswerType.FAIL);
                     ans.setMessage("The key " + request.getKey() + " was not found");
@@ -296,11 +290,9 @@ public class Server {
         }
     }
 
-
     /** Create the new thread for the new sever*/
     public static void main(String[] args) throws InterruptedIOException {
         Server server = new Server(4749);
-//        server.start();
         server.start();
     }
 }

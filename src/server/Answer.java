@@ -1,11 +1,5 @@
 package server;
 
-enum AnswerType {
-    OK,
-    FAIL,
-    NON
-}
-
 /**
  * This class create the answer with answer type, key and maybe value
  */
@@ -25,35 +19,35 @@ public class Answer {
                 + ", key = " + answer + " and value = " + value);
     }
 
-    void setAnswer(AnswerType a){
+    void setAnswer(AnswerType a) {
         answer = a;
     }
 
-    void setRequest(RequestType r){
+    void setRequest(RequestType r) {
         request = r;
     }
 
-    void setValue(String v){
+    void setValue(String v) {
         value = v;
     }
 
-    void setMessage(String m){
+    void setMessage(String m) {
         message = m;
     }
 
-    AnswerType getAnswer(){
+    AnswerType getAnswer() {
         return answer;
     }
 
-    RequestType getRequest(){
+    RequestType getRequest() {
         return request;
     }
 
-    String getValue(){
+    String getValue() {
         return value;
     }
 
-    String getMessage(){
+    String getMessage() {
         return message;
     }
 
