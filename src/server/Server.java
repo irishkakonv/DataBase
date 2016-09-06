@@ -83,7 +83,6 @@ public class Server {
             ex.printStackTrace();
             return; // try to do next command
         }
-
     }
 
     public void parseClientCommand(String command) throws IOException {
