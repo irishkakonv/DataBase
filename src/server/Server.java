@@ -58,10 +58,7 @@ public class Server {
                     exec(input);
 
                     if (answer == null) {
-                        answer.setRequest(RequestType.ADD);
-                        answer.setAnswer(AnswerType.NON);
-                        answer.setValue("");
-                        answer.setMessage("The value is required for this command!");
+                        answer = new Answer(RequestType.UNKNOUWN, AnswerType.NON, "", "ERROR: Incorrect format");
                     }
                     /** Send the answer to a client */
                     out.write("The answer: The command - " + answer.getRequest() + " The status - "
@@ -82,7 +79,7 @@ public class Server {
             parseClientCommand(command);
             handleRequest();
         } catch (IOException ex) {
-            System.err.println("Can't parse the command from user");
+            System.err.println("Can't parse the command from user: " + ex.getMessage());
             ex.printStackTrace();
             return; // try to do next command
         }
@@ -94,8 +91,9 @@ public class Server {
         String key = "<key>";                       // default required value
         String value = null;                        // default value
 
+        /** handle the empty command */
         if (!command.contains(":")) {
-            throw new IOException();
+            throw new IOException("Please, enter the command");
         }
 
         String[] temp = command.split(":");
@@ -125,17 +123,23 @@ public class Server {
             return;
         }
 
-        if (temp[1].contains("=")) {
-            String[] keyAndValue = temp[1].split("=");
-            key = keyAndValue[0];
-            value = keyAndValue[1];
-        } else {
-            key = temp[1];
+        /** handle the incorrect command */
+        try {
+            if (temp[1].contains("=")) {
+                String[] keyAndValue = temp[1].split("=");
+                key = keyAndValue[0];
+                value = keyAndValue[1];
+            } else {
+                key = temp[1];
+            }
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            System.err.println("ERROR: The key is required for this command!");
+            throw new IOException("ERROR: The key is required for this command!");
         }
 
         if (type == RequestType.ADD && value == null) {
-            System.out.println("The value is required for this command!");
-            throw new IOException();
+            System.err.println("ERROR: The value is required for this command!");
+            throw new IOException("ERROR: The value is required for this command!");
         }
         Request req = new Request(type, key, value);
         request = req;
