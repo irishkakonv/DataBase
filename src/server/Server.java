@@ -82,7 +82,7 @@ public class Server {
         } catch (IOException ex) {
             System.err.println("Can't parse the command from user");
             ex.printStackTrace();
-            return;
+            return; // try to do next command
         }
 
     }
@@ -107,12 +107,20 @@ public class Server {
             case "DELETE":
                 type = RequestType.DELETE;
                 break;
+            case "RMALL":
+                type = RequestType.RMALL;
+                break;
             case "UNKNOUWN":
                 type = RequestType.UNKNOUWN;
                 break;
             default:
                 System.out.println("The command is not correct. Can't parse the command");
                 throw new IOException();
+        }
+        /**  */
+        if (type == RequestType.RMALL) {
+            request = new Request(type, "", "");
+            return;
         }
 
         if (temp[1].contains("=")) {
@@ -178,6 +186,10 @@ public class Server {
                 }
                 break;
 
+            case RMALL:
+                System.out.println("Handle RMALL...");
+                data.clear();
+                writeFile();
             default:
                 System.out.println("Error: unknown error");
                 throw new IOException();
@@ -290,7 +302,7 @@ public class Server {
         }
     }
 
-    /** Create the new thread for the new sever*/
+    /** Create the new sever*/
     public static void main(String[] args) throws InterruptedIOException {
         Server server = new Server(4749);
         server.start();
