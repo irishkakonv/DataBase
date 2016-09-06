@@ -1,7 +1,5 @@
 package server;
 
-
-
 /**
  * This class create the request with the request type,
  * key and value
@@ -20,27 +18,27 @@ public class Request {
         + ", key = " + this.key + " and value = " + this.value);
     }
 
-    void setType(RequestType t) {
+    public void setType(RequestType t) {
         type = t;
     }
 
-    void setKey(String k) {
+    public void setKey(String k) {
         key = k;
     }
 
-    void setValue(String v) {
+    public void setValue(String v) {
         value = v;
     }
 
-    RequestType getType()  {
+    public RequestType getType()  {
         return type;
     }
 
-    String getKey() {
+    public String getKey() {
         return key;
     }
 
-    String getValue() {
+    public String getValue() {
         return value;
     }
 }

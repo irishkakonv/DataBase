@@ -1,7 +1,7 @@
 package server;
 
 /** Enum with with different request type */
-enum RequestType {
+public enum RequestType {
     ADD,
     FIND,
     DELETE,

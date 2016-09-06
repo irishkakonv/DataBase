@@ -19,35 +19,35 @@ public class Answer {
                 + ", key = " + answer + " and value = " + value);
     }
 
-    void setAnswer(AnswerType a) {
+    public void setAnswer(AnswerType a) {
         answer = a;
     }
 
-    void setRequest(RequestType r) {
+    public void setRequest(RequestType r) {
         request = r;
     }
 
-    void setValue(String v) {
+    public void setValue(String v) {
         value = v;
     }
 
-    void setMessage(String m) {
+    public void setMessage(String m) {
         message = m;
     }
 
-    AnswerType getAnswer() {
+    public AnswerType getAnswer() {
         return answer;
     }
 
-    RequestType getRequest() {
+    public RequestType getRequest() {
         return request;
     }
 
-    String getValue() {
+    public String getValue() {
         return value;
     }
 
-    String getMessage() {
+    public String getMessage() {
         return message;
     }
 

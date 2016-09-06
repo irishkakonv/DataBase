@@ -17,14 +17,14 @@ public class Server {
     private PrintWriter out;
 
     String dbFilePath;
-    LinkedList<Box> data;
-    Request request;
-    Answer answer;
+    public LinkedList<Box> data;
+    public Request request;
+    public Answer answer;
 
     /** The constructor with port*/
     public Server(int port){
         this.port = port;
-        this.dbFilePath = "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/db.txt";
+        this.dbFilePath = "C:\\Java\\MyProjects\\DataBase\\out\\production\\DataBase\\dbfiles\\db.txt";
         data = new LinkedList<Box>();
     }
 
@@ -87,10 +87,10 @@ public class Server {
 
     }
 
-    private void parseClientCommand(String command) throws IOException {
+    public void parseClientCommand(String command) throws IOException {
         RequestType type = RequestType.UNKNOUWN;    // default value
         String key = "<key>";                       // default required value
-        String value = null;                          // default value
+        String value = null;                        // default value
 
         if (!command.contains(":")) {
             throw new IOException();
@@ -132,7 +132,7 @@ public class Server {
     }
 
     /** handle request and fill the instance of the answer*/
-    private void handleRequest() throws IOException{
+    public void handleRequest() throws IOException{
         Answer ans = new Answer(request.getType(), AnswerType.NON, "", "");     // the default answer
         /** Fill the data*/
         readFile();
@@ -187,7 +187,7 @@ public class Server {
     }
 
     /** Open file and fill the data */
-    private void readFile() throws FileNotFoundException{
+    public void readFile() throws FileNotFoundException{
         /** The special object for building strings */
         File file = new File(dbFilePath);
         try {
@@ -228,7 +228,7 @@ public class Server {
     }
 
     /** Writing to the file from the data */
-    private void writeFile() throws IOException {
+    public void writeFile() throws IOException {
         File file = new File(dbFilePath);
 
         try {
@@ -251,7 +251,7 @@ public class Server {
         System.out.println("The file was written successfully");
     }
 
-    private String findBox(String key) throws Exception {
+    public String findBox(String key) throws Exception {
         for (Box box: data) {
             if (box.getKey().equals(key)) {
                 System.out.println("The value was found");
@@ -262,7 +262,7 @@ public class Server {
         throw new Exception();
     }
 
-    private void removeBox(String key) {
+    public void removeBox(String key) {
         for (Box box: data) {
             if (box.getKey().equals(key)) {
                 data.remove(box);
@@ -272,7 +272,7 @@ public class Server {
     }
 
     /** Check the key */
-    private boolean keyExists(String key) {
+    public boolean keyExists(String key) {
         for (Box box: data) {
             if (box.getKey().equals(key)) {
                 System.out.println("The key exists");
@@ -284,7 +284,7 @@ public class Server {
     }
 
     /** Check the file */
-    private static void exists(File file) throws FileNotFoundException {
+    public static void exists(File file) throws FileNotFoundException {
         if (!file.exists()) {
             throw new FileNotFoundException(file.getName());
         }
