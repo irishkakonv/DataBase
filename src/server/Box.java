@@ -1,7 +1,7 @@
 package server;
 
 /** The instance of this class contains key and value */
-class Box {
+public class Box {
     private String key;
     private String value;
 

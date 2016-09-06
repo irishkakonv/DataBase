@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -15,11 +17,11 @@ public class Server {
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-
-    String dbFilePath;
-    LinkedList<Box> data;
-    Request request;
-    Answer answer;
+    /** Public only for test */
+    public String dbFilePath;
+    public LinkedList<Box> data;
+    public Request request;
+    public Answer answer;
 
     /** The constructor with port*/
     public Server(int port){
@@ -62,8 +64,8 @@ public class Server {
                         answer.setMessage("The value is required for this command!");
                     }
                     /** Send the answer to a client */
-                    out.write("The answer: The command " + answer.getRequest() + " with status "
-                            + answer.getAnswer() + ". The value is " + answer.getValue()
+                    out.write("The answer: The command - " + answer.getRequest() + " The status - "
+                            + answer.getAnswer() + ". The value - " + answer.getValue()
                             + " and the message: " + answer.getMessage() + '\n');
                     out.flush();
                 }
@@ -87,10 +89,10 @@ public class Server {
 
     }
 
-    private void parseClientCommand(String command) throws IOException {
+    public void parseClientCommand(String command) throws IOException {
         RequestType type = RequestType.UNKNOUWN;    // default value
         String key = "<key>";                       // default required value
-        String value = null;                          // default value
+        String value = null;                        // default value
 
         if (!command.contains(":")) {
             throw new IOException();
@@ -140,7 +142,7 @@ public class Server {
     }
 
     /** handle request and fill the instance of the answer*/
-    private void handleRequest() throws IOException{
+    public void handleRequest() throws IOException{
         Answer ans = new Answer(request.getType(), AnswerType.NON, "", "");     // the default answer
         /** Fill the data*/
         readFile();
@@ -199,7 +201,7 @@ public class Server {
     }
 
     /** Open file and fill the data */
-    private void readFile() throws FileNotFoundException{
+    public void readFile() throws FileNotFoundException{
         /** The special object for building strings */
         File file = new File(dbFilePath);
         try {
@@ -240,7 +242,7 @@ public class Server {
     }
 
     /** Writing to the file from the data */
-    private void writeFile() throws IOException {
+    public void writeFile() throws IOException {
         File file = new File(dbFilePath);
 
         try {
@@ -263,18 +265,30 @@ public class Server {
         System.out.println("The file was written successfully");
     }
 
-    private String findBox(String key) throws Exception {
+    public String findBox(String key) throws Exception {
+        /** for text format */
         for (Box box: data) {
             if (box.getKey().equals(key)) {
                 System.out.println("The value was found");
                 return box.getValue();
             }
         }
+        /** for regex format */
+        String results = "";
+        Pattern regexp = Pattern.compile(key);
+        for (Box box: data) {
+            Matcher matcher = regexp.matcher(box.getKey());
+            if (matcher.matches()) {
+                results += box.getKey() + " ";
+            }
+        }
+        if (results != "") return results;
+
         System.out.println("The value wasn't found");
         throw new Exception();
     }
 
-    private void removeBox(String key) {
+    public void removeBox(String key) {
         for (Box box: data) {
             if (box.getKey().equals(key)) {
                 data.remove(box);
@@ -284,7 +298,7 @@ public class Server {
     }
 
     /** Check the key */
-    private boolean keyExists(String key) {
+    public boolean keyExists(String key) {
         for (Box box: data) {
             if (box.getKey().equals(key)) {
                 System.out.println("The key exists");
@@ -296,7 +310,7 @@ public class Server {
     }
 
     /** Check the file */
-    private static void exists(File file) throws FileNotFoundException {
+    public static void exists(File file) throws FileNotFoundException {
         if (!file.exists()) {
             throw new FileNotFoundException(file.getName());
         }

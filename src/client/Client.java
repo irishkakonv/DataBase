@@ -67,7 +67,9 @@ public class Client {
      private void callHelp() {
          System.out.println("1. ADD:<KEY>=[VALUE]");
          System.out.println("2. FIND:<KEY>");
-         System.out.println("3. DELETE:<KEY>");
+         System.out.println("3. FIND:PATTERN");
+         System.out.println("4. DELETE:<KEY>");
+         System.out.println("5. RMALL");
          System.out.println("Enter please the command: ");
      }
 
