@@ -5,5 +5,6 @@ package user;
 public enum UserType {
     UNUSER,     //unauthUser
     USER,       //authUser
-    ADMIN
+    ADMIN,
+    UNKNOWN     // if error
 }

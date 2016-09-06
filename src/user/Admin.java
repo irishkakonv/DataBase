@@ -2,6 +2,7 @@ package user;
 
 import server.RequestType;
 
+
 /**
  * Admin class with additional methods
  */

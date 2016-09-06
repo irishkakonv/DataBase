@@ -1,5 +1,8 @@
 package server;
 
+import user.Main;
+import user.UserType;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -22,6 +25,7 @@ public class Server {
     public LinkedList<Box> data;
     public Request request;
     public Answer answer;
+    public UserType userType;
 
     /** The constructor with port*/
     public Server(int port){
@@ -40,6 +44,10 @@ public class Server {
     /** Creating the server socket, waiting for the connection*/
     public void start(){
         try{
+            /** 0 - if the first message with login and password from user,
+             * 1 - if the second message with command */
+            int flag = 0;
+            Main main = new Main(); // The main class of user package
             ss = new ServerSocket(this.port);
             while(true) {
                 System.out.println("Waiting for a client...");
@@ -53,7 +61,24 @@ public class Server {
 
                 String input;
                 while ((input = in.readLine()) != null) {
-                    if (input.equalsIgnoreCase("exit")) break;
+//                    if (input.equalsIgnoreCase("exit")) break;
+
+                    if (flag == 0) {
+                        /** Initialise userType */
+                        this.userType = main.main(input);
+
+                        if (this.userType == UserType.UNKNOWN) {
+                            out.write("ERROR: Login or password isn't correct" + '\n');
+                            out.flush();
+                        }
+                        flag = 1;
+                        continue;
+                    }
+                    /** Only for admin */
+                    else if (flag == 1 && this.userType == UserType.ADMIN) {
+                        String adminAnswer = main.handleAdminCommand(input);
+                    }
+
                     /** The common function */
                     exec(input);
 
@@ -242,6 +267,7 @@ public class Server {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+        System.out.println("The file was read successfully");
     }
 
     /** Writing to the file from the data */
