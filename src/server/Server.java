@@ -1,7 +1,6 @@
 package server;
 
-import user.Main;
-import user.UserType;
+import user.*;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -61,32 +60,53 @@ public class Server {
 
                 String input;
                 while ((input = in.readLine()) != null) {
-//                    if (input.equalsIgnoreCase("exit")) break;
+                    if (input.equalsIgnoreCase("logout")) {
+                        flag = 0;
+                        out.write("Logout done" + '\n');
+                        out.flush();
+                        continue;
+                    };
 
                     if (flag == 0) {
                         /** Initialise userType */
                         this.userType = main.main(input);
 
+                        if (this.userType == UserType.UNUSER) {
+                            out.write("Hello the guest" + '\n');
+                            out.flush();
+                            flag = 1;
+                            continue;
+                        }
+
                         if (this.userType == UserType.UNKNOWN) {
                             out.write("ERROR: Login or password isn't correct" + '\n');
                             out.flush();
+                            continue;
                         }
+
                         flag = 1;
+                        out.write("OK: Login and password is correct" + '\n');
+                        out.flush();
                         continue;
                     }
                     /** Only for admin */
-                    else if (flag == 1 && this.userType == UserType.ADMIN) {
+                    else if (flag == 1 && this.userType == UserType.ADMIN &&
+                            (input.contains("ADDUSER") || input.contains("RMUSER") ||
+                            input.contains("RMUSERS") || input.contains("LSUSER"))) {
                         String adminAnswer = main.handleAdminCommand(input);
+                        out.write(adminAnswer + '\n');
+                        out.flush();
+                        continue;
                     }
 
                     /** The common function */
                     exec(input);
 
                     if (answer == null) {
-                        answer = new Answer(RequestType.UNKNOUWN, AnswerType.NON, "", "ERROR: Incorrect format");
+                        answer = new Answer(RequestType.UNKNOUWN, AnswerType.NON, "", "ERROR: Incorrect format or permission denied");
                     }
                     /** Send the answer to a client */
-                    out.write("The answer: The command - " + answer.getRequest() + " The status - "
+                    out.write("The answer: The command - " + answer.getRequest() + ". The status - "
                             + answer.getAnswer() + ". The value - " + answer.getValue()
                             + " and the message: " + answer.getMessage() + '\n');
                     out.flush();
@@ -98,10 +118,30 @@ public class Server {
         }
     }
 
+    public void checkPermissions() throws IOException {
+        if (this.userType.equals(UserType.UNUSER)) {
+            UnauthUser user = new UnauthUser("guest");
+            if(user.checkPermissions(this.request.getType())) return;
+        }
+
+        else if (this.userType.equals(UserType.USER)) {
+            AuthUser user = new AuthUser("", "");
+            if (user.checkPermissions(this.request.getType())) return;
+        }
+
+        else if (this.userType.equals(UserType.ADMIN)) {
+            Admin admin = new Admin("", "");
+            if (admin.checkPermissions(this.request.getType())) return;
+        }
+        throw new IOException("Permission denied");
+    }
+
+
     /** This method control the sequence of the execution command */
     public void exec(String command) {
         try {
             parseClientCommand(command);
+            checkPermissions();
             handleRequest();
         } catch (IOException ex) {
             System.err.println("Can't parse the command from user: " + ex.getMessage());
@@ -114,6 +154,12 @@ public class Server {
         RequestType type = RequestType.UNKNOUWN;    // default value
         String key = "<key>";                       // default required value
         String value = null;                        // default value
+
+        if (command.equals("RMALL")) {
+            type = RequestType.RMALL;
+            request = new Request(type, "", "");
+            return;
+        }
 
         /** handle the empty command */
         if (!command.contains(":")) {
@@ -139,12 +185,7 @@ public class Server {
                 break;
             default:
                 System.out.println("The command is not correct. Can't parse the command");
-                throw new IOException();
-        }
-        /**  */
-        if (type == RequestType.RMALL) {
-            request = new Request(type, "", "");
-            return;
+                throw new IOException("The command is not correct. Can't parse the command");
         }
 
         /** handle the incorrect command */

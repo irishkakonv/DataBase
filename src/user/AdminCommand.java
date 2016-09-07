@@ -1,7 +1,9 @@
 package user;
 
-/**
- * Created by stratopedarx on 07.09.16.
- */
+/** Enum with with different admin commands */
 public enum AdminCommand {
+    ADDUSER,
+    LSUSER,
+    RMUSER,
+    RMUSERS
 }

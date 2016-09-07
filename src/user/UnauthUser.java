@@ -15,7 +15,7 @@ public class UnauthUser extends User {
     }
 
     @Override
-    boolean checkPermissions(RequestType rType) {
+    public boolean checkPermissions(RequestType rType) {
         for (RequestType type: permissions) {
             if (type == rType) return true;
         }

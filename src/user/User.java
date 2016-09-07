@@ -11,5 +11,5 @@ abstract public class User {
     UserType userType;
     RequestType[] permissions;
 
-    abstract boolean checkPermissions(RequestType rType);
+    abstract public boolean checkPermissions(RequestType rType);
 }

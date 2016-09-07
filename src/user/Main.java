@@ -6,6 +6,8 @@ import java.io.*;
 import java.util.LinkedList;
 
 import static server.Server.exists;
+import static user.AdminCommand.*;
+import static user.UserType.USER;
 
 /**
  * Main class manage user packages
@@ -15,10 +17,10 @@ public class Main {
     private String passwd;
     private UserType userType;
     private String userFilePath;
-    private LinkedList<UserBox> usersData = new LinkedList<UserBox>();
+    private LinkedList<UserBox> usersData;
 
     public Main() {
-        userFilePath = "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/users";
+        setUserFilePath("/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/users");
     }
 
     public String getLogin() {
@@ -53,9 +55,17 @@ public class Main {
         this.usersData = usersData;
     }
 
+    public String getUserFilePath() {
+        return userFilePath;
+    }
+
+    public void setUserFilePath(String userFilePath) {
+        this.userFilePath = userFilePath;
+    }
+
     /** Return UserType */
     public UserType mapUserType(String type) {
-        if(type == "user"){
+        if(type.equals("user")){
             return UserType.USER;
         }
         return UserType.ADMIN;
@@ -63,7 +73,7 @@ public class Main {
 
     /** Return string with user type */
     public String mapStrUserType(UserType userType) {
-        if (userType == UserType.USER) {
+        if (userType == USER) {
             return "user";
         }
         return "admin";
@@ -73,6 +83,7 @@ public class Main {
     public void readFile() throws FileNotFoundException {
         /** The special object for building strings */
         File file = new File(userFilePath);
+        this.usersData = new LinkedList<UserBox>();
         try {
             exists(file);     // check the file path
         } catch (FileNotFoundException ex) {
@@ -132,10 +143,12 @@ public class Main {
         System.out.println("The file was written successfully");
     }
 
+    /** parse server's command */
     public void parseCommand(String loginPasswd) throws IOException{
         System.out.println("Handle server command");
-        if (loginPasswd == "guest" || loginPasswd == "Guest" || loginPasswd == "GUEST") {
+        if (loginPasswd.equals("guest") || loginPasswd.equals("Guest") || loginPasswd.equals("GUEST")) {
             this.setUserType(UserType.UNUSER);
+            return;
         }
 
         if (loginPasswd.contains(":")) {
@@ -157,23 +170,113 @@ public class Main {
     /** check user. If user exist and the password is correct set userType */
     public void checkUser() throws IOException {
         for (UserBox box: usersData) {
-            if (box.getLogin() == this.getLogin() && box.getPasswd() == this.getPasswd()) {
+            if (box.getLogin().equals(this.getLogin()) && box.getPasswd().equals(this.getPasswd())) {
                 setUserType(box.getUserType());
                 return;
             }
-            throw new IOException("Incorrect login or password");
+        }
+        throw new IOException("Incorrect login or password");
+    }
+
+    /** check user's login */
+    public boolean userExists(String login) {
+        for (UserBox box: usersData) {
+            if (box.getLogin() == login) return true;
+        }
+        return false;
+    }
+
+    /** return answer to server */
+    public String handleAdminCommand(String command) {
+        String answer = "";
+        Admin admin = new Admin(this.getLogin(), this.getPasswd());
+        try {
+            admin.parseAdminCommand(command);
+            if (admin.getAdminCommand() == AdminCommand.ADDUSER) {
+                System.out.println("Handle ADDUSER");
+                String[] loginPasswd = admin.getParamsCommand().split("=");
+                try {
+                    if (!userExists(loginPasswd[0])) {
+                        addUser(loginPasswd[0], loginPasswd[1]);
+                    } else {
+                        System.out.println("User already exists");
+                        answer = "User already exists";
+                    }
+                } catch (IndexOutOfBoundsException ex) {
+                    throw new IOException("The parameters are not correct");
+                }
+                writeFile();    // save and close the file
+            }
+
+            else if (admin.getAdminCommand() == AdminCommand.RMUSER) {
+                System.out.println("Handle RMUSER");
+                if (userExists(command)) {
+                    rmUser(command);
+                } else {
+                    System.out.println("User doesn't exists");
+                    answer = "User doesn't exists";
+                }
+                writeFile();    // save and close the file
+                answer = "User added";
+            }
+
+            else if (admin.getAdminCommand() == AdminCommand.RMUSERS) {
+                System.out.println("Handle RMUSERS");
+                rmUsers();
+                writeFile();    // save and close the file
+                answer = "Deleted all users";
+            }
+
+            else if (admin.getAdminCommand() == AdminCommand.LSUSER) {
+                System.out.println("Handle LSUSER");
+                answer = lsUsers();
+            }
+            else {
+                throw new IOException("Unknown error");
+            }
+
+        } catch (IOException ex) {
+            System.err.println(ex.getMessage());
+            return ex.getMessage();
+        }
+        return answer;
+    }
+
+    /** Add new user with permissions as user */
+    public void addUser(String login, String passwd) {
+        usersData.add(new UserBox(login, passwd, USER));
+    }
+
+    /** Return list of all unauthorized users */
+    public String lsUsers() {
+        String results = "";
+        for (UserBox box: usersData) {
+            results += box.getLogin() + " " + box.getPasswd() + '\n';
+        }
+        return results;
+    }
+
+    /** Delete user by login */
+    public void rmUser(String login) {
+        for (UserBox box: usersData) {
+            if (box.getLogin() == login) {
+                usersData.remove(box);
+                return;
+            }
         }
     }
 
-    public String handleAdminCommand(String command) {
-        Admin admin = new Admin(this.getLogin(), this.getPasswd());
-
+    /** Delete all users */
+    public void rmUsers() {
+        usersData.clear();
     }
 
     /** main method */
     public UserType main(String args) throws IOException{
         try {
             parseCommand(args);
+            if (this.getUserType() == UserType.UNUSER) return UserType.UNUSER;
+            readFile();
             checkUser();
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
