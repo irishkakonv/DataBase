@@ -44,7 +44,7 @@ public class Client {
                     out.flush();
                     fserver = in.readLine();
                     System.out.println(fserver);
-                    welcomeMessage();
+                    callMessage();
                 }
                 out.close();
                 in.close();
@@ -57,19 +57,32 @@ public class Client {
             }
         }
 
-     private void welcomeMessage() {
+     private void callMessage() {
          System.out.println("Enter please the command in format ");
          System.out.println("COMMAND:<KEY>=[VALUE] ");
          System.out.println("Type 'close' or 'exit' for exit");
          System.out.println("Use --help or -h for the help information: ");
      }
 
+    private void welcomeMessage() {
+        System.out.println("Enter please login and password in format");
+        System.out.println("<login>:<password> ");
+        System.out.println("If you want login as the guest enter please: <guest>");
+        System.out.println("If you want logoff enter please: <logoff>");
+        System.out.println("Use --help or -h for the help information: ");
+    }
+
      private void callHelp() {
-         System.out.println("1. ADD:<KEY>=[VALUE]");
-         System.out.println("2. FIND:<KEY>");
-         System.out.println("3. FIND:PATTERN");
-         System.out.println("4. DELETE:<KEY>");
-         System.out.println("5. RMALL");
+         System.out.println("1. ADD:<KEY>=[VALUE] - Available for user and admin. Action - add the key and the value.");
+         System.out.println("2. FIND:<KEY> - Available for guest, user and admin. Action - find the value by the key.");
+         System.out.println("3. FIND:PATTERN - Available for guest, user and admin. Action - find the value by the pattern.");
+         System.out.println("4. DELETE:<KEY> - Available for user and admin. Action - delete the pair by the key.");
+         System.out.println("5. RMALL - Available for admim. Action - clears the database.");
+         System.out.println("6. RMUSER - Available for admim. Action - delete user by login.");
+         System.out.println("7. RMUSERS - Available for admim. Action - delete all users except admin.");
+         System.out.println("8. ADDUSER - Available for admim. Action - add new user if doesn't exist.");
+         System.out.println("9. LSUSER - Available for admim. Action - print list of available users.");
+         System.out.println("logoff - finish the user session.");
          System.out.println("Enter please the command: ");
      }
 

@@ -20,7 +20,7 @@ public class Main {
     private LinkedList<UserBox> usersData;
 
     public Main() {
-        setUserFilePath("/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/users");
+        setUserFilePath("C:\\lobanov\\Java\\DataBase\\src\\dbfiles\\users");
     }
 
     public String getLogin() {
@@ -181,7 +181,7 @@ public class Main {
     /** check user's login */
     public boolean userExists(String login) {
         for (UserBox box: usersData) {
-            if (box.getLogin() == login) return true;
+            if (box.getLogin().equals(login)) return true;
         }
         return false;
     }
@@ -192,12 +192,13 @@ public class Main {
         Admin admin = new Admin(this.getLogin(), this.getPasswd());
         try {
             admin.parseAdminCommand(command);
-            if (admin.getAdminCommand() == AdminCommand.ADDUSER) {
+            if (admin.getAdminCommand().equals(AdminCommand.ADDUSER)) {
                 System.out.println("Handle ADDUSER");
                 String[] loginPasswd = admin.getParamsCommand().split("=");
                 try {
                     if (!userExists(loginPasswd[0])) {
                         addUser(loginPasswd[0], loginPasswd[1]);
+                        answer = "Added user: " + loginPasswd[0] + " " + loginPasswd[1];
                     } else {
                         System.out.println("User already exists");
                         answer = "User already exists";
@@ -208,26 +209,26 @@ public class Main {
                 writeFile();    // save and close the file
             }
 
-            else if (admin.getAdminCommand() == AdminCommand.RMUSER) {
+            else if (admin.getAdminCommand().equals(AdminCommand.RMUSER)) {
                 System.out.println("Handle RMUSER");
-                if (userExists(command)) {
-                    rmUser(command);
+                if (userExists(admin.getParamsCommand())) {
+                    rmUser(admin.getParamsCommand());
                 } else {
                     System.out.println("User doesn't exists");
                     answer = "User doesn't exists";
                 }
                 writeFile();    // save and close the file
-                answer = "User added";
+                answer = "User was deleted";
             }
 
-            else if (admin.getAdminCommand() == AdminCommand.RMUSERS) {
+            else if (admin.getAdminCommand().equals(AdminCommand.RMUSERS)) {
                 System.out.println("Handle RMUSERS");
                 rmUsers();
                 writeFile();    // save and close the file
                 answer = "Deleted all users";
             }
 
-            else if (admin.getAdminCommand() == AdminCommand.LSUSER) {
+            else if (admin.getAdminCommand().equals(AdminCommand.LSUSER)) {
                 System.out.println("Handle LSUSER");
                 answer = lsUsers();
             }
@@ -251,7 +252,7 @@ public class Main {
     public String lsUsers() {
         String results = "";
         for (UserBox box: usersData) {
-            results += box.getLogin() + " " + box.getPasswd() + '\n';
+            results += box.getLogin() + " " + box.getPasswd() + "; ";
         }
         return results;
     }
@@ -259,23 +260,25 @@ public class Main {
     /** Delete user by login */
     public void rmUser(String login) {
         for (UserBox box: usersData) {
-            if (box.getLogin() == login) {
+            if (box.getLogin().equals(login)) {
                 usersData.remove(box);
                 return;
             }
         }
     }
 
-    /** Delete all users */
+    /** Delete all users except admin*/
     public void rmUsers() {
         usersData.clear();
+        usersData.add(new UserBox(this.getLogin(), this.getPasswd(), UserType.ADMIN));
     }
 
     /** main method */
     public UserType main(String args) throws IOException{
         try {
+            this.setUserType(UserType.UNKNOWN);
             parseCommand(args);
-            if (this.getUserType() == UserType.UNUSER) return UserType.UNUSER;
+            if (this.getUserType().equals(UserType.UNUSER)) return UserType.UNUSER;
             readFile();
             checkUser();
         } catch (IOException ex) {

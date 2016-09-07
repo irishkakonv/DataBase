@@ -37,10 +37,10 @@ public class Admin extends  AuthUser {
 
     public void parseAdminCommand(String command) throws IOException {
 
-        if (command == "LSUSER") {
+        if (command.equals("LSUSER")) {
             this.setAdminCommand(AdminCommand.LSUSER);
         }
-        else if (command == "RMUSERS") {
+        else if (command.equals("RMUSERS")) {
             this.setAdminCommand(AdminCommand.RMUSERS);
         }
         else if (command.contains(":")) {
@@ -69,8 +69,8 @@ public class Admin extends  AuthUser {
             /** Parse the command ADDUSER:login=passwd or RMUSER:login */
             try {
                 if (strings[1].equals("")) {  // handle the command RMUSERS: or LSUSER:
-                    if (this.getAdminCommand() == AdminCommand.LSUSER ||
-                            this.getAdminCommand() == AdminCommand.RMUSERS) {
+                    if (this.getAdminCommand().equals(AdminCommand.LSUSER) ||
+                            this.getAdminCommand().equals(AdminCommand.RMUSERS)) {
                         this.setParamsCommand("");
                     }
                 } else {
@@ -80,7 +80,6 @@ public class Admin extends  AuthUser {
                 System.err.println("ERROR: The key is required for this command!");
                 throw new IOException("ERROR: The key is required for this command!");
             }
-
         }
     }
 }

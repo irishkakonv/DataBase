@@ -29,7 +29,7 @@ public class Server {
     /** The constructor with port*/
     public Server(int port){
         this.port = port;
-        this.dbFilePath = "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/db.txt";
+        this.dbFilePath = "C:\\lobanov\\Java\\DataBase\\src\\dbfiles\\db.txt";
         data = new LinkedList<Box>();
     }
 
@@ -103,13 +103,15 @@ public class Server {
                     exec(input);
 
                     if (answer == null) {
-                        answer = new Answer(RequestType.UNKNOUWN, AnswerType.NON, "", "ERROR: Incorrect format or permission denied");
+                        answer = new Answer(RequestType.UNKNOUWN, AnswerType.NON, "", "ERROR: Incorrect format or permissions denied");
                     }
                     /** Send the answer to a client */
                     out.write("The answer: The command - " + answer.getRequest() + ". The status - "
                             + answer.getAnswer() + ". The value - " + answer.getValue()
                             + " and the message: " + answer.getMessage() + '\n');
                     out.flush();
+                    this.request = null;    // erase the filed
+                    this.answer = null;     // erase the filed
                 }
             }
         } catch (IOException ex){
@@ -261,6 +263,9 @@ public class Server {
                 System.out.println("Handle RMALL...");
                 data.clear();
                 writeFile();
+                ans.setAnswer(AnswerType.OK);
+                ans.setMessage("Everything was removed");
+                break;
             default:
                 System.out.println("Error: unknown error");
                 throw new IOException();
