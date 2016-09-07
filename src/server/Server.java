@@ -29,7 +29,7 @@ public class Server {
     /** The constructor with port*/
     public Server(int port){
         this.port = port;
-        this.dbFilePath = "C:\\lobanov\\Java\\DataBase\\src\\dbfiles\\db.txt";
+        this.dbFilePath = "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/db.txt";
         data = new LinkedList<Box>();
     }
 

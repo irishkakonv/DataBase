@@ -82,7 +82,7 @@ public class Client {
          System.out.println("7. RMUSERS - Available for admim. Action - delete all users except admin.");
          System.out.println("8. ADDUSER - Available for admim. Action - add new user if doesn't exist.");
          System.out.println("9. LSUSER - Available for admim. Action - print list of available users.");
-         System.out.println("logoff - finish the user session.");
+         System.out.println("logout - finish the user session.");
          System.out.println("Enter please the command: ");
      }
 

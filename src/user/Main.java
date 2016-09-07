@@ -20,7 +20,7 @@ public class Main {
     private LinkedList<UserBox> usersData;
 
     public Main() {
-        setUserFilePath("C:\\lobanov\\Java\\DataBase\\src\\dbfiles\\users");
+        setUserFilePath("/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/users");
     }
 
     public String getLogin() {
