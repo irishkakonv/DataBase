@@ -19,8 +19,9 @@ public class Main {
     private String userFilePath;
     private LinkedList<UserBox> usersData;
 
-    public Main() {
-        setUserFilePath("/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/users");
+
+    public Main(String userFilePath) {
+        setUserFilePath(userFilePath);
     }
 
     public String getLogin() {

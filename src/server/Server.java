@@ -25,18 +25,22 @@ public class Server {
     public Request request;
     public Answer answer;
     public UserType userType;
+    /** Path to users file*/
+    public String userFilePath;
 
-    /** The constructor with port*/
-    public Server(int port){
-        this.port = port;
-        this.dbFilePath = "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/db.txt";
-        data = new LinkedList<Box>();
-    }
+
+//    /** The constructor with port*/
+//    public Server(int port){
+//        this.port = port;
+//        this.dbFilePath = "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\db.txt";
+//        data = new LinkedList<Box>();
+//    }
 
     /** The constructor with port and dbPath */
-    public Server(int port, String filePath){
+    public Server(int port, String filePath, String userFilePath){
         this.port = port;
         this.dbFilePath = filePath;
+        this.userFilePath = userFilePath;
         data = new LinkedList<Box>();
     }
 
@@ -46,7 +50,7 @@ public class Server {
             /** 0 - if the first message with login and password from user,
              * 1 - if the second message with command */
             int flag = 0;
-            Main main = new Main(); // The main class of user package
+            Main main = new Main(userFilePath); // The main class of user package
             ss = new ServerSocket(this.port);
             while(true) {
                 System.out.println("Waiting for a client...");
@@ -393,7 +397,8 @@ public class Server {
 
     /** Create the new sever*/
     public static void main(String[] args) throws InterruptedIOException {
-        Server server = new Server(4749);
+        Server server = new Server(4749, "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\db.txt",
+                                         "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\users");
         server.start();
     }
 }
