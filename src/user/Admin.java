@@ -3,6 +3,7 @@ package user;
 import server.RequestType;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 /**
@@ -66,9 +67,10 @@ public class Admin extends  AuthUser {
                     System.out.println("The command is not correct. Can't parse the command");
                     throw new IOException("The command is not correct. Can't parse the command");
             }
+
             /** Parse the command ADDUSER:login=passwd or RMUSER:login */
             try {
-                if (strings[1].equals("")) {  // handle the command RMUSERS: or LSUSER:
+                if ((strings[0].equals("LSUSER") || strings[0].equals("RMUSERS")) && strings.length == 1) {  // handle the command RMUSERS: or LSUSER:
                     if (this.getAdminCommand().equals(AdminCommand.LSUSER) ||
                             this.getAdminCommand().equals(AdminCommand.RMUSERS)) {
                         this.setParamsCommand("");
