@@ -60,43 +60,50 @@ public class Server {
 
                 String input;
                 while ((input = in.readLine()) != null) {
-                    if (input.equalsIgnoreCase("logout")) {
-                        flag = 0;
-                        out.write("Logout done" + '\n');
-                        out.flush();
-                        continue;
-                    };
+//                    if (input.equalsIgnoreCase("logout")) {
+//                        flag = 0;
+//                        out.write("Logout done" + '\n');
+//                        out.flush();
+//                        continue;
+//                    };
+//
+//                    if (flag == 0) {
+//                        /** Initialise userType */
+//                        this.userType = main.main(input);
+//
+//                        if (this.userType == UserType.UNUSER) {
+//                            out.write("Hello the guest" + '\n');
+//                            out.flush();
+//                            flag = 1;
+//                            continue;
+//                        }
+//
+//                        if (this.userType == UserType.UNKNOWN) {
+//                            out.write("ERROR: Login or password isn't correct" + '\n');
+//                            out.flush();
+//                            continue;
+//                        }
+//
+//                        flag = 1;
+//                        out.write("OK: Login and password is correct" + '\n');
+//                        out.flush();
+//                        continue;
+//                    }
+//                    /** Only for admin */
+//                    else if (flag == 1 && this.userType == UserType.ADMIN &&
+//                            (input.contains("ADDUSER") || input.contains("RMUSER") ||
+//                            input.contains("RMUSERS") || input.contains("LSUSER"))) {
+//                        String adminAnswer = main.handleAdminCommand(input);
+//                        out.write(adminAnswer + '\n');
+//                        out.flush();
+//                        continue;
+//                    }
 
-                    if (flag == 0) {
-                        /** Initialise userType */
-                        this.userType = main.main(input);
-
-                        if (this.userType == UserType.UNUSER) {
-                            out.write("Hello the guest" + '\n');
-                            out.flush();
-                            flag = 1;
-                            continue;
-                        }
-
-                        if (this.userType == UserType.UNKNOWN) {
-                            out.write("ERROR: Login or password isn't correct" + '\n');
-                            out.flush();
-                            continue;
-                        }
-
-                        flag = 1;
-                        out.write("OK: Login and password is correct" + '\n');
-                        out.flush();
-                        continue;
-                    }
-                    /** Only for admin */
-                    else if (flag == 1 && this.userType == UserType.ADMIN &&
-                            (input.contains("ADDUSER") || input.contains("RMUSER") ||
-                            input.contains("RMUSERS") || input.contains("LSUSER"))) {
-                        String adminAnswer = main.handleAdminCommand(input);
-                        out.write(adminAnswer + '\n');
-                        out.flush();
-                        continue;
+                    try {
+                        parseClientCommand(input);
+                    } catch (IOException ex) {
+                        System.err.println("Can't parse the command from user: " + ex.getMessage());
+                        ex.printStackTrace();
                     }
 
                     /** The common function */
@@ -142,7 +149,7 @@ public class Server {
     /** This method control the sequence of the execution command */
     public void exec(String command) {
         try {
-            parseClientCommand(command);
+//            parseClientCommand(command);
             checkPermissions();
             handleRequest();
         } catch (IOException ex) {
@@ -165,7 +172,7 @@ public class Server {
 
         /** handle the empty command */
         if (!command.contains(":")) {
-            throw new IOException("Please, enter the command");
+            throw new IOException("The command was not entered");
         }
 
         String[] temp = command.split(":");

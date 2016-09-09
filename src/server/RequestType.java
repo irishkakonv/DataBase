@@ -6,5 +6,7 @@ public enum RequestType {
     FIND,       // find the value by the key
     DELETE,     // delete the key and the value
     RMALL,      // delete all key and value (for only admin)
-    UNKNOUWN    // the default value
+    UNKNOUWN,   // the default value
+    LOGIN,      // log in the service
+    LOGOFF      // log out
 }
