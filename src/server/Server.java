@@ -60,45 +60,6 @@ public class Server {
 
                 String input;
                 while ((input = in.readLine()) != null) {
-//                    if (input.equalsIgnoreCase("logout")) {
-//                        flag = 0;
-//                        out.write("Logout done" + '\n');
-//                        out.flush();
-//                        continue;
-//                    };
-//
-//                    if (flag == 0) {
-//                        /** Initialise userType */
-//                        this.userType = main.main(input);
-//
-//                        if (this.userType == UserType.UNUSER) {
-//                            out.write("Hello the guest" + '\n');
-//                            out.flush();
-//                            flag = 1;
-//                            continue;
-//                        }
-//
-//                        if (this.userType == UserType.UNKNOWN) {
-//                            out.write("ERROR: Login or password isn't correct" + '\n');
-//                            out.flush();
-//                            continue;
-//                        }
-//
-//                        flag = 1;
-//                        out.write("OK: Login and password is correct" + '\n');
-//                        out.flush();
-//                        continue;
-//                    }
-//                    /** Only for admin */
-//                    else if (flag == 1 && this.userType == UserType.ADMIN &&
-//                            (input.contains("ADDUSER") || input.contains("RMUSER") ||
-//                            input.contains("RMUSERS") || input.contains("LSUSER"))) {
-//                        String adminAnswer = main.handleAdminCommand(input);
-//                        out.write(adminAnswer + '\n');
-//                        out.flush();
-//                        continue;
-//                    }
-
                     try {
                         parseClientCommand(input);
                     } catch (IOException ex) {
@@ -106,8 +67,50 @@ public class Server {
                         ex.printStackTrace();
                     }
 
+                    if (request.getType().equals(RequestType.LOGOFF)) {
+                        flag = 0;
+                        out.write("Logout done" + '\n');    // ??????????????
+                        out.flush();
+                        continue;
+                    }
+
+                    if (flag == 0) {
+                        if (this.userType.equals(UserType.UNUSER)) {
+                            flag = 1;
+                            out.write("Hello the guest" + '\n');    // ??????????
+                            out.flush();
+                            continue;
+                        }
+
+                        /** Initialise userType */
+                        this.userType = main.main(this.request);
+
+                        if (this.userType.equals(UserType.UNKNOWN)) {
+                            out.write("ERROR: Login or password isn't correct" + '\n');     // ????????????
+                            out.flush();
+                            continue;
+                        }
+
+                        flag = 1;
+                        out.write("OK: Login and password is correct" + '\n');  // ??????????????
+                        out.flush();
+                        continue;
+                    }
+
+                    /** Only for admin */
+                    if (flag == 1 && this.userType.equals(UserType.ADMIN) &&
+                            (this.request.getType().equals(RequestType.ADDUSER) ||
+                            this.request.getType().equals(RequestType.LSUSER) ||
+                            this.request.getType().equals(RequestType.RMUSER) ||
+                            this.request.getType().equals(RequestType.RMUSERS))) {
+                        String adminAnswer = main.handleAdminCommand(this.request);
+                        out.write(adminAnswer + '\n');  // ?????????
+                        out.flush();
+                        continue;
+                    }
+
                     /** The common function */
-                    exec(input);
+                    exec();
 
                     if (answer == null) {
                         answer = new Answer(RequestType.UNKNOUWN, AnswerType.NON, "", "ERROR: Incorrect format or permissions denied");
@@ -147,7 +150,7 @@ public class Server {
 
 
     /** This method control the sequence of the execution command */
-    public void exec(String command) {
+    public void exec() {
         try {
 //            parseClientCommand(command);
             checkPermissions();
@@ -159,14 +162,26 @@ public class Server {
         }
     }
 
+    /** Parse the client command and fill the object of request*/
     public void parseClientCommand(String command) throws IOException {
         RequestType type = RequestType.UNKNOUWN;    // default value
-        String key = "<key>";                       // default required value
+        String key = null;                          // default value
         String value = null;                        // default value
 
         if (command.equals("RMALL")) {
             type = RequestType.RMALL;
             request = new Request(type, "", "");
+            return;
+        }
+
+        if (command.equals("LOGOFF")) {
+            type = RequestType.LOGOFF;
+            request = new Request(type, "", "");
+            return;
+        }
+
+        if (command.equals("GUEST") || command.equals("guest")) {
+            this.userType = UserType.UNUSER;
             return;
         }
 
@@ -177,6 +192,12 @@ public class Server {
 
         String[] temp = command.split(":");
         switch (temp[0]) {
+            case "LOGIN":
+                type = RequestType.LOGIN;
+                break;
+            case "LOGOFF":
+                type = RequestType.LOGOFF;
+                break;
             case "ADD":
                 type = RequestType.ADD;
                 break;
@@ -211,7 +232,7 @@ public class Server {
             throw new IOException("ERROR: The key is required for this command!");
         }
 
-        if (type == RequestType.ADD && value == null) {
+        if ((type == RequestType.ADD || type == RequestType.LOGIN)&& value == null) {
             System.err.println("ERROR: The value is required for this command!");
             throw new IOException("ERROR: The value is required for this command!");
         }
