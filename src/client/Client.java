@@ -34,8 +34,7 @@ public class Client {
                 String fuser, fserver;
 
                 while ((fuser = inu.readLine()) != null) {
-                    if (fuser.equalsIgnoreCase("close")) break;
-                    if (fuser.equalsIgnoreCase("exit")) break;
+                    if (fuser.equalsIgnoreCase("close") || fuser.equalsIgnoreCase("exit")) break;
                     if (fuser.equalsIgnoreCase("--help") || fuser.equalsIgnoreCase("-h")) {
                         callHelp();
                         continue;
@@ -60,23 +59,23 @@ public class Client {
      private void callMessage() {
          System.out.println("Enter please the command in format: ");
          System.out.println("COMMAND:<KEY>=[VALUE] ");
-         System.out.println("If you want log out type please: ");
-         System.out.println("LOGOFF");
+         System.out.println("If you want logoff enter please the command: LOGOFF");
          System.out.println("Type 'close' or 'exit' for exit");
          System.out.println("Use --help or -h for the help information: ");
      }
 
     private void welcomeMessage() {
-        System.out.println("Enter please login and password in format");
-        System.out.println("LOGIN:<login>:<password> ");
-        System.out.println("If you want login as the guest enter please: <guest>");
-        System.out.println("If you want logoff enter please: <logoff>");
+        System.out.println("You are welcome.");
+        System.out.println("Enter please login and password in format:");
+        System.out.println("LOGIN:<login>:<password>");
+        System.out.println("If you want login as the guest enter please: guest or GUEST");
+        System.out.println("Type 'close' or 'exit' for exit");
         System.out.println("Use --help or -h for the help information: ");
     }
 
      private void callHelp() {
          System.out.println("1. LOGIN:<login>=<password> - Log in the service");
-         System.out.println("2. LOGOFF - Log out");
+         System.out.println("2. LOGOFF - Finish the user session.");
          System.out.println("3. ADD:<KEY>=[VALUE] - Available for user and admin. Action - add the key and the value.");
          System.out.println("4. FIND:<KEY> - Available for guest, user and admin. Action - find the value by the key.");
          System.out.println("5. FIND:PATTERN - Available for guest, user and admin. Action - find the value by the pattern.");
@@ -86,7 +85,6 @@ public class Client {
          System.out.println("9. RMUSERS - Available for admim. Action - delete all users except admin.");
          System.out.println("10. ADDUSER - Available for admim. Action - add new user if doesn't exist.");
          System.out.println("11. LSUSER - Available for admim. Action - print list of available users.");
-         System.out.println("logout - finish the user session.");
          System.out.println("Enter please the command: ");
      }
 
