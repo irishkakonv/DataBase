@@ -19,13 +19,13 @@ public class ServerTest {
     private Server server;
 
 
-    @Before
-    public void setUp() throws Exception {
-        server = new Server(4749);
-        server.dbFilePath = "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/testFile";
-//        server2 = new Server(4749, )
-
-    }
+//    @Before
+//    public void setUp() throws Exception {
+//        server = new Server(4749);
+//        server.dbFilePath = "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/testFile";
+////        server2 = new Server(4749, )
+//
+//    }
 
     @After
     public void tearDown() throws Exception {
