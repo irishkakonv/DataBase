@@ -19,7 +19,8 @@ public class Server {
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-    /** Public only for test */
+
+    // Public only for test
     public String dbFilePath;
     public LinkedList<Box> data;
     public Request request;
@@ -28,31 +29,41 @@ public class Server {
     /** Path to users file*/
     public String userFilePath;
 
+    /**
+     * The constructor with port
+     */
+    public Server(int port) {
+        this.port = port;
+        this.dbFilePath = "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/db.txt";
+        data = new LinkedList<Box>();
+    }
 
-//    /** The constructor with port*/
-//    public Server(int port){
-//        this.port = port;
-//        this.dbFilePath = "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\db.txt";
-//        data = new LinkedList<Box>();
-//    }
-
-    /** The constructor with port and dbPath */
-    public Server(int port, String filePath, String userFilePath){
+    /**
+     * The constructor with port and dbPath
+     */
+    public Server(int port, String filePath) {
         this.port = port;
         this.dbFilePath = filePath;
         this.userFilePath = userFilePath;
         data = new LinkedList<Box>();
     }
 
-    /** Creating the server socket, waiting for the connection*/
-    public void start(){
-        try{
+    /**
+     * Creating the server socket, waiting for the connection
+     */
+    public void start() {
+        try {
             /** 0 - if the first message with login and password from user,
              * 1 - if the second message with command */
             int flag = 0;
+<<<<<<< HEAD
             Main main = new Main(userFilePath); // The main class of user package
+=======
+            this.userType = UserType.UNKNOWN;   // default value
+            Main main = new Main(); // The main class of user package
+>>>>>>> features
             ss = new ServerSocket(this.port);
-            while(true) {
+            while (true) {
                 System.out.println("Waiting for a client...");
                 /** accept connection */
                 socket = ss.accept();
@@ -64,61 +75,75 @@ public class Server {
 
                 String input;
                 while ((input = in.readLine()) != null) {
-                    if (input.equalsIgnoreCase("logout")) {
-                        flag = 0;
-                        out.write("Logout done" + '\n');
+                    try {
+                        parseClientCommand(input);
+                    } catch (IOException ex) {
+                        System.err.println("Can't parse the command from user: " + ex.getMessage());
+                        ex.printStackTrace();
+                        out.write("UNKNOWN NON" + '\n');
                         out.flush();
                         continue;
-                    };
+                    }
 
+                    // if the client is guest
+                    if (flag == 0 && this.userType.equals(UserType.UNUSER)) {
+                        flag = 1;
+                        out.write("Hello the guest" + '\n');
+                        out.flush();
+                        continue;
+                    }
+
+                    if (request.getType().equals(RequestType.LOGOFF)) {
+                        flag = 0;
+                        this.userType = UserType.UNKNOWN;
+                        out.write("LOGOFF OK" + '\n');
+                        out.flush();
+                        continue;
+                    }
+
+                    // initialise userType
                     if (flag == 0) {
-                        /** Initialise userType */
-                        this.userType = main.main(input);
+                        this.userType = main.handleLoginRequest(this.request);
 
-                        if (this.userType == UserType.UNUSER) {
-                            out.write("Hello the guest" + '\n');
-                            out.flush();
-                            flag = 1;
-                            continue;
-                        }
-
-                        if (this.userType == UserType.UNKNOWN) {
-                            out.write("ERROR: Login or password isn't correct" + '\n');
+                        if (this.userType.equals(UserType.UNKNOWN)) {
+                            out.write("LOGIN FAIL" + '\n');
                             out.flush();
                             continue;
                         }
 
                         flag = 1;
-                        out.write("OK: Login and password is correct" + '\n');
+                        out.write("LOGIN OK" + '\n');
                         out.flush();
                         continue;
                     }
-                    /** Only for admin */
-                    else if (flag == 1 && this.userType == UserType.ADMIN &&
-                            (input.contains("ADDUSER") || input.contains("RMUSER") ||
-                            input.contains("RMUSERS") || input.contains("LSUSER"))) {
-                        String adminAnswer = main.handleAdminCommand(input);
+
+                    // Only for admin
+                    if (flag == 1 && this.userType.equals(UserType.ADMIN) &&
+                            (this.request.getType().equals(RequestType.ADDUSER) ||
+                                    this.request.getType().equals(RequestType.LSUSER) ||
+                                    this.request.getType().equals(RequestType.RMUSER) ||
+                                    this.request.getType().equals(RequestType.RMUSERS))) {
+                        String adminAnswer = main.handleAdminCommand(this.request);
                         out.write(adminAnswer + '\n');
                         out.flush();
                         continue;
                     }
 
-                    /** The common function */
-                    exec(input);
+                    /** The common function - check permissions and handle request  */
+                    exec();
 
                     if (answer == null) {
-                        answer = new Answer(RequestType.UNKNOUWN, AnswerType.NON, "", "ERROR: Incorrect format or permissions denied");
+                        answer = new Answer(request.getType(), AnswerType.FAIL, "", "");
                     }
+
                     /** Send the answer to a client */
-                    out.write("The answer: The command - " + answer.getRequest() + ". The status - "
-                            + answer.getAnswer() + ". The value - " + answer.getValue()
-                            + " and the message: " + answer.getMessage() + '\n');
+                    out.write(answer.getRequest() + " " + answer.getAnswer() + " " + answer.getValue() + '\n');
                     out.flush();
                     this.request = null;    // erase the filed
                     this.answer = null;     // erase the filed
                 }
             }
-        } catch (IOException ex){
+        } catch (IOException ex) {
             System.err.println("Can't start the server!");
             ex.printStackTrace();
         }
@@ -127,15 +152,11 @@ public class Server {
     public void checkPermissions() throws IOException {
         if (this.userType.equals(UserType.UNUSER)) {
             UnauthUser user = new UnauthUser("guest");
-            if(user.checkPermissions(this.request.getType())) return;
-        }
-
-        else if (this.userType.equals(UserType.USER)) {
+            if (user.checkPermissions(this.request.getType())) return;
+        } else if (this.userType.equals(UserType.USER)) {
             AuthUser user = new AuthUser("", "");
             if (user.checkPermissions(this.request.getType())) return;
-        }
-
-        else if (this.userType.equals(UserType.ADMIN)) {
+        } else if (this.userType.equals(UserType.ADMIN)) {
             Admin admin = new Admin("", "");
             if (admin.checkPermissions(this.request.getType())) return;
         }
@@ -143,10 +164,11 @@ public class Server {
     }
 
 
-    /** This method control the sequence of the execution command */
-    public void exec(String command) {
+    /**
+     * This method control the sequence of the execution command
+     */
+    public void exec() {
         try {
-            parseClientCommand(command);
             checkPermissions();
             handleRequest();
         } catch (IOException ex) {
@@ -156,24 +178,49 @@ public class Server {
         }
     }
 
+    /**
+     * Parse the client command and fill the object of request
+     */
     public void parseClientCommand(String command) throws IOException {
-        RequestType type = RequestType.UNKNOUWN;    // default value
-        String key = "<key>";                       // default required value
+        RequestType type;
+        String key;
         String value = null;                        // default value
 
         if (command.equals("RMALL")) {
-            type = RequestType.RMALL;
-            request = new Request(type, "", "");
+            request = new Request(RequestType.RMALL, "", "");
+            return;
+        }
+
+        if (command.equals("LOGOFF")) {
+            request = new Request(RequestType.LOGOFF, "", "");
+            return;
+        }
+
+        if (command.equals("LSUSER")) {
+            request = new Request(RequestType.LSUSER, "", "");
+            return;
+        }
+
+        if (command.equals("RMUSERS")) {
+            request = new Request(RequestType.RMUSERS, "", "");
+            return;
+        }
+
+        if (command.equals("GUEST") || command.equals("guest")) {
+            this.userType = UserType.UNUSER;
             return;
         }
 
         /** handle the empty command */
         if (!command.contains(":")) {
-            throw new IOException("Please, enter the command");
+            throw new IOException("The command was not entered");
         }
 
         String[] temp = command.split(":");
         switch (temp[0]) {
+            case "LOGIN":
+                type = RequestType.LOGIN;
+                break;
             case "ADD":
                 type = RequestType.ADD;
                 break;
@@ -189,6 +236,14 @@ public class Server {
             case "UNKNOUWN":
                 type = RequestType.UNKNOUWN;
                 break;
+            // for admin
+            case "ADDUSER":
+                type = RequestType.ADDUSER;
+                break;
+            case "RMUSER":
+                type = RequestType.RMUSER;
+                break;
+
             default:
                 System.out.println("The command is not correct. Can't parse the command");
                 throw new IOException("The command is not correct. Can't parse the command");
@@ -208,7 +263,7 @@ public class Server {
             throw new IOException("ERROR: The key is required for this command!");
         }
 
-        if (type == RequestType.ADD && value == null) {
+        if ((type == RequestType.ADD || type == RequestType.LOGIN) && value == null) {
             System.err.println("ERROR: The value is required for this command!");
             throw new IOException("ERROR: The value is required for this command!");
         }
@@ -216,8 +271,10 @@ public class Server {
         request = req;
     }
 
-    /** handle request and fill the instance of the answer*/
-    public void handleRequest() throws IOException{
+    /**
+     * handle request and fill the instance of the answer
+     */
+    public void handleRequest() throws IOException {
         Answer ans = new Answer(request.getType(), AnswerType.NON, "", "");     // the default answer
         /** Fill the data*/
         readFile();
@@ -226,14 +283,13 @@ public class Server {
                 System.out.println("Handle ADD...");
                 if (keyExists(request.getKey())) {
                     ans.setAnswer(AnswerType.FAIL);
-                    ans.setMessage("The key " + request.getKey() + " already exists");
+                    //ans.setMessage("The key " + request.getKey() + " already exists");
                 } else {
                     System.out.println("Adding key-value");
                     data.add(new Box(request.getKey(), request.getValue()));
                     writeFile();
                     ans.setAnswer(AnswerType.OK);
-                    ans.setMessage("The key " + request.getKey()
-                            + " and the value " + request.getValue() + " were added successfully");
+//                    ans.setMessage("The key " + request.getKey() + " and the value " + request.getValue() + " were added successfully");
                 }
                 break;
 
@@ -242,10 +298,10 @@ public class Server {
                 try {
                     ans.setValue(findBox(request.getKey()));
                     ans.setAnswer(AnswerType.OK);
-                    ans.setMessage("The value was found");
+//                    ans.setMessage("The value was found");
                 } catch (Exception ex) {
                     ans.setAnswer(AnswerType.FAIL);
-                    ans.setMessage("The key " + request.getKey() +" was not found");
+//                    ans.setMessage("The key " + request.getKey() +" was not found");
                 }
                 break;
 
@@ -256,10 +312,10 @@ public class Server {
                     writeFile();
 
                     ans.setAnswer(AnswerType.OK);
-                    ans.setMessage("The key " + request.getKey() + " was deleted");
+//                    ans.setMessage("The key " + request.getKey() + " was deleted");
                 } else {
                     ans.setAnswer(AnswerType.FAIL);
-                    ans.setMessage("The key " + request.getKey() + " was not found");
+//                    ans.setMessage("The key " + request.getKey() + " was not found");
                 }
                 break;
 
@@ -268,7 +324,7 @@ public class Server {
                 data.clear();
                 writeFile();
                 ans.setAnswer(AnswerType.OK);
-                ans.setMessage("Everything was removed");
+//                ans.setMessage("Everything was removed");
                 break;
             default:
                 System.out.println("Error: unknown error");
@@ -278,8 +334,10 @@ public class Server {
         answer = ans;
     }
 
-    /** Open file and fill the data */
-    public void readFile() throws FileNotFoundException{
+    /**
+     * Open file and fill the data
+     */
+    public void readFile() throws FileNotFoundException {
         /** The special object for building strings */
         File file = new File(dbFilePath);
         try {
@@ -291,11 +349,11 @@ public class Server {
 
         try {
             /** The object for reading in buffer*/
-            BufferedReader in = new BufferedReader(new FileReader( file.getAbsoluteFile()));
+            BufferedReader in = new BufferedReader(new FileReader(file.getAbsoluteFile()));
             try {
                 /** Read the file by a string */
                 String str;
-                while((str = in.readLine()) != null) {
+                while ((str = in.readLine()) != null) {
                     if (str.contains(" ")) {
                         String[] keyAndValue = str.split(" ");
                         try {
@@ -320,7 +378,9 @@ public class Server {
         System.out.println("The file was read successfully");
     }
 
-    /** Writing to the file from the data */
+    /**
+     * Writing to the file from the data
+     */
     public void writeFile() throws IOException {
         File file = new File(dbFilePath);
 
@@ -331,7 +391,7 @@ public class Server {
             }
             PrintWriter out = new PrintWriter(file.getAbsoluteFile());
             try {
-                for (Box box: data) {
+                for (Box box : data) {
                     out.print(box.getKey() + " " + box.getValue() + '\n');
                 }
             } finally {
@@ -346,7 +406,7 @@ public class Server {
 
     public String findBox(String key) throws Exception {
         /** for text format */
-        for (Box box: data) {
+        for (Box box : data) {
             if (box.getKey().equals(key)) {
                 System.out.println("The value was found");
                 return box.getValue();
@@ -355,10 +415,10 @@ public class Server {
         /** for regex format */
         String results = "";
         Pattern regexp = Pattern.compile(key);
-        for (Box box: data) {
+        for (Box box : data) {
             Matcher matcher = regexp.matcher(box.getKey());
             if (matcher.matches()) {
-                results += box.getKey() + " ";
+                results += box.getKey() + "=" + box.getValue() + "; ";
             }
         }
         if (results != "") return results;
@@ -368,7 +428,7 @@ public class Server {
     }
 
     public void removeBox(String key) {
-        for (Box box: data) {
+        for (Box box : data) {
             if (box.getKey().equals(key)) {
                 data.remove(box);
                 break;
@@ -376,9 +436,11 @@ public class Server {
         }
     }
 
-    /** Check the key */
+    /**
+     * Check the key
+     */
     public boolean keyExists(String key) {
-        for (Box box: data) {
+        for (Box box : data) {
             if (box.getKey().equals(key)) {
                 System.out.println("The key exists");
                 return true;
@@ -388,14 +450,18 @@ public class Server {
         return false;
     }
 
-    /** Check the file */
+    /**
+     * Check the file
+     */
     public static void exists(File file) throws FileNotFoundException {
         if (!file.exists()) {
             throw new FileNotFoundException(file.getName());
         }
     }
 
-    /** Create the new sever*/
+    /**
+     * Create the new sever
+     */
     public static void main(String[] args) throws InterruptedIOException {
         Server server = new Server(4749, "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\db.txt",
                                          "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\users");

@@ -3,8 +3,8 @@ package user;
 /** Enum with with different user type */
 
 public enum UserType {
-    UNUSER,     //unauthUser
-    USER,       //authUser
+    UNUSER,     //unauth User
+    USER,       //auth User
     ADMIN,
-    UNKNOWN     // if error
+    UNKNOWN     // default value and if error
 }

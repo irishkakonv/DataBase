@@ -2,7 +2,7 @@ package server;
 
 /**
  * This class create the request with the request type,
- * key and value
+ * key/login and value/password
  */
 public class Request {
     private RequestType type;
@@ -15,7 +15,7 @@ public class Request {
         this.value = v;
 
         System.out.println("The request was created with request type = " + this.type
-        + ", key = " + this.key + " and value = " + this.value);
+        + ", key/login = " + this.key + " and value/password = " + this.value);
     }
 
     public void setType(RequestType t) {
