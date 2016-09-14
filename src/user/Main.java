@@ -1,6 +1,8 @@
 package user;
 
 import server.Box;
+import server.Request;
+import server.RequestType;
 
 import java.io.*;
 import java.util.LinkedList;
@@ -168,10 +170,12 @@ public class Main {
     }
 
     /** check user. If user exist and the password is correct set userType */
-    public void checkUser() throws IOException {
+    public void checkUser(String login, String passwd) throws IOException {
         for (UserBox box: usersData) {
-            if (box.getLogin().equals(this.getLogin()) && box.getPasswd().equals(this.getPasswd())) {
+            if (box.getLogin().equals(login) && box.getPasswd().equals(passwd)) {
                 setUserType(box.getUserType());
+                setLogin(login);
+                setPasswd(passwd);
                 return;
             }
         }
@@ -186,60 +190,66 @@ public class Main {
         return false;
     }
 
-    /** return answer to server */
-    public String handleAdminCommand(String command) {
+    /** return UserType for user who try logging or raise error */
+    public UserType handleLoginRequest(Request req) {
+
+        try {
+            readFile();
+            checkUser(req.getKey(), req.getValue());
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+            return UserType.UNKNOWN;
+        }
+        return this.getUserType();
+    }
+
+    /** return an answer to server */
+    public String handleAdminCommand(Request req) throws IOException {
         String answer = "";
         Admin admin = new Admin(this.getLogin(), this.getPasswd());
-        try {
-            admin.parseAdminCommand(command);
-            if (admin.getAdminCommand().equals(AdminCommand.ADDUSER)) {
-                System.out.println("Handle ADDUSER");
-                String[] loginPasswd = admin.getParamsCommand().split("=");
-                try {
-                    if (!userExists(loginPasswd[0])) {
-                        addUser(loginPasswd[0], loginPasswd[1]);
-                        answer = "Added user: " + loginPasswd[0] + " " + loginPasswd[1];
-                    } else {
-                        System.out.println("User already exists");
-                        answer = "User already exists";
-                    }
-                } catch (IndexOutOfBoundsException ex) {
-                    throw new IOException("The parameters are not correct");
-                }
-                writeFile();    // save and close the file
-            }
 
-            else if (admin.getAdminCommand().equals(AdminCommand.RMUSER)) {
+        switch (req.getType()) {
+            case ADDUSER:
+                System.out.println("Handle ADDUSER");
+                if (!userExists(req.getKey())) {
+                    addUser(req.getKey(), req.getValue());
+                    answer = "Added user: ";    // ??????????????
+                    writeFile();    // save and close the file
+                } else {
+                    System.out.println("User already exists");
+                    answer = "User already exists";     // ????????????
+                }
+                break;
+
+            case RMUSER:
                 System.out.println("Handle RMUSER");
-                if (userExists(admin.getParamsCommand())) {
-                    rmUser(admin.getParamsCommand());
+                if (userExists(req.getKey())) {
+                    rmUser(req.getKey());
+                    writeFile();    // save and close the file
+                    answer = "User was deleted";
                 } else {
                     System.out.println("User doesn't exists");
                     answer = "User doesn't exists";
                 }
-                writeFile();    // save and close the file
-                answer = "User was deleted";
-            }
+                break;
 
-            else if (admin.getAdminCommand().equals(AdminCommand.RMUSERS)) {
+            case RMUSERS:
                 System.out.println("Handle RMUSERS");
                 rmUsers();
                 writeFile();    // save and close the file
                 answer = "Deleted all users";
-            }
+                break;
 
-            else if (admin.getAdminCommand().equals(AdminCommand.LSUSER)) {
+            case LSUSER:
                 System.out.println("Handle LSUSER");
                 answer = lsUsers();
-            }
-            else {
-                throw new IOException("Unknown error");
-            }
+                break;
 
-        } catch (IOException ex) {
-            System.err.println(ex.getMessage());
-            return ex.getMessage();
+            default:
+                System.out.println("The command is not correct. Can't parse the command");
+                throw new IOException("The command is not correct. Can't parse the command");
         }
+
         return answer;
     }
 
@@ -275,16 +285,16 @@ public class Main {
 
     /** main method */
     public UserType main(String args) throws IOException{
-        try {
-            this.setUserType(UserType.UNKNOWN);
-            parseCommand(args);
-            if (this.getUserType().equals(UserType.UNUSER)) return UserType.UNUSER;
-            readFile();
-            checkUser();
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-            return UserType.UNKNOWN;
-        }
+//        try {
+//            this.setUserType(UserType.UNKNOWN);
+//            parseCommand(args);
+//            if (this.getUserType().equals(UserType.UNUSER)) return UserType.UNUSER;
+//            readFile();
+//            checkUser();
+//        } catch (IOException ex) {
+//            System.out.println(ex.getMessage());
+//            return UserType.UNKNOWN;
+//        }
         return this.getUserType();
     }
 }

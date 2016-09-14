@@ -83,7 +83,7 @@ public class Server {
                         }
 
                         /** Initialise userType */
-                        this.userType = main.main(this.request);
+                        this.userType = main.handleLoginRequest(this.request);
 
                         if (this.userType.equals(UserType.UNKNOWN)) {
                             out.write("ERROR: Login or password isn't correct" + '\n');     // ????????????
@@ -152,7 +152,6 @@ public class Server {
     /** This method control the sequence of the execution command */
     public void exec() {
         try {
-//            parseClientCommand(command);
             checkPermissions();
             handleRequest();
         } catch (IOException ex) {
