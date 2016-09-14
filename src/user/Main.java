@@ -1,14 +1,11 @@
 package user;
 
-import server.Box;
 import server.Request;
-import server.RequestType;
 
 import java.io.*;
 import java.util.LinkedList;
 
 import static server.Server.exists;
-import static user.AdminCommand.*;
 import static user.UserType.USER;
 
 /**
@@ -49,31 +46,23 @@ public class Main {
         this.userType = userType;
     }
 
-    public LinkedList<UserBox> getUsersData() {
-        return usersData;
-    }
-
-    public void setUsersData(LinkedList<UserBox> usersData) {
-        this.usersData = usersData;
-    }
-
-    public String getUserFilePath() {
-        return userFilePath;
-    }
-
     public void setUserFilePath(String userFilePath) {
         this.userFilePath = userFilePath;
     }
 
-    /** Return UserType */
+    /**
+     * Return UserType
+     */
     public UserType mapUserType(String type) {
-        if(type.equals("user")){
+        if (type.equals("user")) {
             return UserType.USER;
         }
         return UserType.ADMIN;
     }
 
-    /** Return string with user type */
+    /**
+     * Return string with user type
+     */
     public String mapStrUserType(UserType userType) {
         if (userType == USER) {
             return "user";
@@ -81,7 +70,9 @@ public class Main {
         return "admin";
     }
 
-    /** Open file and fill the users data */
+    /**
+     * Open file and fill the users data
+     */
     public void readFile() throws FileNotFoundException {
         /** The special object for building strings */
         File file = new File(userFilePath);
@@ -95,11 +86,11 @@ public class Main {
 
         try {
             /** The object for reading in buffer*/
-            BufferedReader in = new BufferedReader(new FileReader( file.getAbsoluteFile()));
+            BufferedReader in = new BufferedReader(new FileReader(file.getAbsoluteFile()));
             try {
                 /** Read the file by a string */
                 String str;
-                while((str = in.readLine()) != null) {
+                while ((str = in.readLine()) != null) {
                     String[] strings = str.split(":");
                     try {
                         UserBox userBox = new UserBox(strings[0], strings[1], mapUserType(strings[2]));
@@ -120,7 +111,9 @@ public class Main {
         System.out.println("The file was read successfully");
     }
 
-    /** Writing to the file from the data */
+    /**
+     * Writing to the file from the data
+     */
     public void writeFile() throws IOException {
         File file = new File(userFilePath);
 
@@ -131,9 +124,9 @@ public class Main {
             }
             PrintWriter out = new PrintWriter(file.getAbsoluteFile());
             try {
-                for (UserBox box: usersData) {
+                for (UserBox box : usersData) {
                     out.print(box.getLogin() + ":" + box.getPasswd() + ":"
-                            + mapStrUserType(box.getUserType()) +'\n');
+                            + mapStrUserType(box.getUserType()) + '\n');
                 }
             } finally {
                 out.close();
@@ -145,8 +138,10 @@ public class Main {
         System.out.println("The file was written successfully");
     }
 
-    /** parse server's command */
-    public void parseCommand(String loginPasswd) throws IOException{
+    /**
+     * parse server's command
+     */
+    public void parseCommand(String loginPasswd) throws IOException {
         System.out.println("Handle server command");
         if (loginPasswd.equals("guest") || loginPasswd.equals("Guest") || loginPasswd.equals("GUEST")) {
             this.setUserType(UserType.UNUSER);
@@ -162,16 +157,17 @@ public class Main {
                 System.out.println("ERROR: incorrect server's command");
                 throw new IOException("ERROR: incorrect server's command");
             }
-        }
-        else {
+        } else {
             System.out.println("ERROR: incorrect server's command");
             throw new IOException("ERROR: incorrect server's command");
         }
     }
 
-    /** check user. If user exist and the password is correct set userType */
+    /**
+     * check user. If user exist and the password is correct set userType
+     */
     public void checkUser(String login, String passwd) throws IOException {
-        for (UserBox box: usersData) {
+        for (UserBox box : usersData) {
             if (box.getLogin().equals(login) && box.getPasswd().equals(passwd)) {
                 setUserType(box.getUserType());
                 setLogin(login);
@@ -182,15 +178,19 @@ public class Main {
         throw new IOException("Incorrect login or password");
     }
 
-    /** check user's login */
+    /**
+     * check user's login
+     */
     public boolean userExists(String login) {
-        for (UserBox box: usersData) {
+        for (UserBox box : usersData) {
             if (box.getLogin().equals(login)) return true;
         }
         return false;
     }
 
-    /** return UserType for user who try logging or raise error */
+    /**
+     * return UserType for user who try logging or raise error
+     */
     public UserType handleLoginRequest(Request req) {
 
         try {
@@ -203,21 +203,22 @@ public class Main {
         return this.getUserType();
     }
 
-    /** return an answer to server */
+    /**
+     * return an answer to server
+     */
     public String handleAdminCommand(Request req) throws IOException {
         String answer = "";
-        Admin admin = new Admin(this.getLogin(), this.getPasswd());
 
         switch (req.getType()) {
             case ADDUSER:
                 System.out.println("Handle ADDUSER");
                 if (!userExists(req.getKey())) {
                     addUser(req.getKey(), req.getValue());
-                    answer = "Added user: ";    // ??????????????
+                    answer = "ADDUSER OK";
                     writeFile();    // save and close the file
                 } else {
                     System.out.println("User already exists");
-                    answer = "User already exists";     // ????????????
+                    answer = "ADDUSER FAIL";
                 }
                 break;
 
@@ -226,10 +227,10 @@ public class Main {
                 if (userExists(req.getKey())) {
                     rmUser(req.getKey());
                     writeFile();    // save and close the file
-                    answer = "User was deleted";
+                    answer = "RMUSER OK";
                 } else {
                     System.out.println("User doesn't exists");
-                    answer = "User doesn't exists";
+                    answer = "RMUSER FAIL";
                 }
                 break;
 
@@ -237,12 +238,12 @@ public class Main {
                 System.out.println("Handle RMUSERS");
                 rmUsers();
                 writeFile();    // save and close the file
-                answer = "Deleted all users";
+                answer = "RMUSERS OK";
                 break;
 
             case LSUSER:
                 System.out.println("Handle LSUSER");
-                answer = lsUsers();
+                answer = "LSUSER OK " + lsUsers();
                 break;
 
             default:
@@ -253,23 +254,29 @@ public class Main {
         return answer;
     }
 
-    /** Add new user with permissions as user */
+    /**
+     * Add new user with permissions as user
+     */
     public void addUser(String login, String passwd) {
         usersData.add(new UserBox(login, passwd, USER));
     }
 
-    /** Return list of all unauthorized users */
+    /**
+     * Return list of all unauthorized users
+     */
     public String lsUsers() {
         String results = "";
-        for (UserBox box: usersData) {
+        for (UserBox box : usersData) {
             results += box.getLogin() + " " + box.getPasswd() + "; ";
         }
         return results;
     }
 
-    /** Delete user by login */
+    /**
+     * Delete user by login
+     */
     public void rmUser(String login) {
-        for (UserBox box: usersData) {
+        for (UserBox box : usersData) {
             if (box.getLogin().equals(login)) {
                 usersData.remove(box);
                 return;
@@ -277,24 +284,11 @@ public class Main {
         }
     }
 
-    /** Delete all users except admin*/
+    /**
+     * Delete all users except admin
+     */
     public void rmUsers() {
         usersData.clear();
         usersData.add(new UserBox(this.getLogin(), this.getPasswd(), UserType.ADMIN));
-    }
-
-    /** main method */
-    public UserType main(String args) throws IOException{
-//        try {
-//            this.setUserType(UserType.UNKNOWN);
-//            parseCommand(args);
-//            if (this.getUserType().equals(UserType.UNUSER)) return UserType.UNUSER;
-//            readFile();
-//            checkUser();
-//        } catch (IOException ex) {
-//            System.out.println(ex.getMessage());
-//            return UserType.UNKNOWN;
-//        }
-        return this.getUserType();
     }
 }

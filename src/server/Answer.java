@@ -50,6 +50,4 @@ public class Answer {
     public String getMessage() {
         return message;
     }
-
-
 }

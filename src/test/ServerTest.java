@@ -131,7 +131,7 @@ public class ServerTest {
     public void test_void_handleRequest() {
         Answer ansTest = new Answer(RequestType.ADD, AnswerType.FAIL, "", "The key sergey already exists");
 
-        server.exec("ADD:sergey=lobanov");
+//        server.exec("ADD:sergey=lobanov");
         assertEquals(ansTest.getRequest(), server.answer.getRequest());
         assertEquals(ansTest.getAnswer(), server.answer.getAnswer());
         assertEquals(ansTest.getMessage(), server.answer.getMessage());

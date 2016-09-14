@@ -3,7 +3,7 @@ package user;
 import server.Box;
 
 /**
- * The instance of this class contains login, passwd and userType
+ * The instance of this class contains login, password and userType
  */
 public class UserBox {
     private String login;
