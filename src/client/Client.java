@@ -67,7 +67,7 @@ public class Client {
     private void welcomeMessage() {
         System.out.println("You are welcome.");
         System.out.println("Enter please login and password in format:");
-        System.out.println("LOGIN:<login>:<password>");
+        System.out.println("LOGIN:<login>=<password>");
         System.out.println("If you want login as the guest enter please: guest or GUEST");
         System.out.println("Type 'close' or 'exit' for exit");
         System.out.println("Use --help or -h for the help information: ");
