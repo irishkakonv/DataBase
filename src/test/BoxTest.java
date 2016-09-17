@@ -25,12 +25,12 @@ public class BoxTest {
     }
 
     @Test
-    public void test_getKey() throws Exception {
+    public void test_void_getKey_String() throws Exception {
         assertEquals("key", box.getKey());
     }
 
     @Test
-    public void getValue() throws Exception {
+    public void test_void_getValue_String() throws Exception {
         assertEquals("value", box.getValue());
     }
 
