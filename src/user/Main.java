@@ -16,7 +16,7 @@ public class Main {
     private String passwd;
     private UserType userType;
     private String userFilePath;
-    private LinkedList<UserBox> usersData;
+    public LinkedList<UserBox> usersData;
 
 
     public Main(String userFilePath) {
@@ -137,31 +137,6 @@ public class Main {
             throw new RuntimeException(ex);
         }
         System.out.println("The file was written successfully");
-    }
-
-    /**
-     * parse server's command
-     */
-    public void parseCommand(String loginPasswd) throws IOException {
-        System.out.println("Handle server command");
-        if (loginPasswd.equals("guest") || loginPasswd.equals("Guest") || loginPasswd.equals("GUEST")) {
-            this.setUserType(UserType.UNUSER);
-            return;
-        }
-
-        if (loginPasswd.contains(":")) {
-            try {
-                String[] strings = loginPasswd.split(":");
-                this.setLogin(strings[0]);
-                this.setPasswd(strings[1]);
-            } catch (IndexOutOfBoundsException ex) {
-                System.out.println("ERROR: incorrect server's command");
-                throw new IOException("ERROR: incorrect server's command");
-            }
-        } else {
-            System.out.println("ERROR: incorrect server's command");
-            throw new IOException("ERROR: incorrect server's command");
-        }
     }
 
     /**
