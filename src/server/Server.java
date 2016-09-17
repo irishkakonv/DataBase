@@ -16,8 +16,8 @@ import java.util.regex.Pattern;
 public class Server {
     private int port;
     private ServerSocket ss;
-    private Socket socket;
-    private BufferedReader in;
+    public Socket socket;
+    public BufferedReader in;
     private PrintWriter out;
 
     // Public only for test
@@ -26,6 +26,7 @@ public class Server {
     public Request request;
     public Answer answer;
     public UserType userType;
+    public UnauthUser user;
     /** Path to users file*/
     public String userFilePath;
 
@@ -138,7 +139,7 @@ public class Server {
 
     public void checkPermissions() throws IOException {
         if (this.userType.equals(UserType.UNUSER)) {
-            UnauthUser user = new UnauthUser("guest");
+            user = new UnauthUser("guest");
             if (user.checkPermissions(this.request.getType())) return;
         } else if (this.userType.equals(UserType.USER)) {
             AuthUser user = new AuthUser("", "");
@@ -149,7 +150,6 @@ public class Server {
         }
         throw new IOException("Permission denied");
     }
-
 
     /**
      * This method control the sequence of the execution command
@@ -404,7 +404,7 @@ public class Server {
         Pattern regexp = Pattern.compile(key);
         for (Box box : data) {
             Matcher matcher = regexp.matcher(box.getKey());
-            if (matcher.matches()) {
+            if (matcher.find()) {
                 results += box.getKey() + "=" + box.getValue() + "; ";
             }
         }
@@ -450,8 +450,9 @@ public class Server {
      * Create the new sever
      */
     public static void main(String[] args) throws InterruptedIOException {
-        Server server = new Server(4749, "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/db.txt",
-                                         "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/users");
+        Server server = new Server(4749, "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\db.txt",
+                                         "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\users");
+
         server.start();
     }
 }
