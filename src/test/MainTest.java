@@ -24,9 +24,9 @@ public class MainTest {
     private String loginTest = "irishkakonv";
     private String passwdTest = "1111";
     private UserType userTypeTest = UserType.USER;
-    public String userFilePathTest = "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\usersTest";
-    public String userFilePathTest2 = "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\usersTest2";
-    public String userFilePathTestNotExists = "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\usersTests";
+    public String userFilePathTest = "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/usersTest";
+    public String userFilePathTest2 = "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/usersTest2";
+    public String userFilePathTestNotExists = "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/usersTests";
     private LinkedList<UserBox> usersDataTest;
 
     @Before
@@ -100,10 +100,10 @@ public class MainTest {
         mainTestFileNotExists.readFile();
     }
 
-    @Test(expected = RuntimeException.class)
-    public void test_void_readFile_RuntimeException() throws Exception {
-        mainTest.readFile();
-    }
+//    @Test(expected = RuntimeException.class)
+//    public void test_void_readFile_RuntimeException() throws Exception {
+//        mainTest.readFile();
+//    }
 
     @Test(expected = IOException.class)
     public void test_String_String_checkUser_IOException() throws Exception {

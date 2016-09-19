@@ -450,8 +450,8 @@ public class Server {
      * Create the new sever
      */
     public static void main(String[] args) throws InterruptedIOException {
-        Server server = new Server(4749, "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\db.txt",
-                                         "C:\\Java\\MyProjects\\DataBase\\src\\dbfiles\\users");
+        Server server = new Server(4749, "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/db.txt",
+                                         "/home/stratopedarx/Java/Projects/DataBase/src/dbfiles/users");
 
         server.start();
     }
